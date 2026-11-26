@@ -13,6 +13,16 @@ async fn handle_request(req: Request<Body>) -> Result<Response<Body>, hyper::Err
             "Try POSTing data to /echo such as: `curl localhost:8080/echo -XPOST -d 'hello world'`",
         ))),
 
+        // Return the submitted text with a prefix.
+        (&Method::POST, "/parrot") => {
+            let body = hyper::body::to_bytes(req.into_body()).await?;
+            let prefix = b"You said:";
+            let mut response = Vec::with_capacity(prefix.len() + body.len());
+            response.extend_from_slice(prefix);
+            response.extend_from_slice(&body);
+            Ok(Response::new(Body::from(response)))
+        }
+
         // Simply echo the body back to the client.
         (&Method::POST, "/echo") => Ok(Response::new(req.into_body())),
 
